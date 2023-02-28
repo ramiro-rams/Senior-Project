@@ -16,6 +16,7 @@ let db;
 
 app = express();
 app.use(express.static(path.join(__dirname, 'static')));
+app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 
 // simple data route to verify that data is being gathered, this will be modified accordingly after implementing
@@ -34,4 +35,14 @@ app.get("/", function (req, res) {
     res.send("test");
 });
 
+app.get("/guest:id", (req, res) => {
+	res.sendFile(__dirname + "/guestTemplate.html")
+	console.log("this is the guest get request");
+});
+app.post("/guest:id", async(req, res) => {
+	console.log("this is the post request");
+	console.log(req);
+	await db.run("INSERT INTO guest (name, event_id, file) VALUES (?, ?, ?)", [req.body.name, req.params.id, req.body.file]);
+	res.sendFile(__dirname + "/guestTemplate.html");   
+});
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
