@@ -3,22 +3,18 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <h1>Welcome to [Event Name]</h1>
+      <form id="guestForm">
+        <label htmlFor="name">First name:</label><br />
+        <input type="text" id="name" name="name" /><br />
+        <label htmlFor="message">Type message here:</label><br />
+        <textarea id="message" name="message" rows="4" cols="50"></textarea><br />
+        <label htmlFor="media">Upload media here:</label><br />
+        <input type="file" /><br />
+        <button type="submit" form="guestForm">Submit</button>
+      </form>
+    </>
   );
 }
 
