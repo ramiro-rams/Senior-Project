@@ -44,7 +44,7 @@ function Guest() {
       formData.append('message', message);
       formData.append('file', file);
       const response = await axios.post('http://localhost:8080/guest', formData);
-      console.log(response);
+      console.log("post request sent");
       setSubmitSuccess(true);
     } catch (error) {
       setSubmitError(error.message);
