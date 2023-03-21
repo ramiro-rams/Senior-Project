@@ -5,9 +5,7 @@ const { open } = require('sqlite');
 const cors = require('cors');
 const multer = require('multer');
 
-
 PORT=8080;
-
 
 // connect to db
 let db;
@@ -30,10 +28,6 @@ app.use(cors());
 app.get("/data", async (req, res) => {
 	const guests = await db.all("SELECT * FROM guest");
 	const organizers = await db.all("SELECT * FROM organizer");
-
-	console.log(guests);
-	console.log(organizers);
-	
 	res.json({guests: guests, organizers: organizers});
 });
 
@@ -43,12 +37,13 @@ app.get("/", function (req, res) {
 
 app.get("/guest", (req, res) => {
 	res.sendFile(__dirname + "/guestTemplate.html")
-	console.log("this is the guest get request");
 });
+app.get("/eventName/:eventId", async (req, res) => {
+	const eventId = req.params.eventId;
+	const eventName = await db.get("SELECT event_name FROM organizer WHERE id = ?", eventId);
+	res.json(eventName);
+})
 app.post("/guest", upload.single('file'), async(req, res) => {
-	console.log("this is the post request");
-	console.log(req.body);
-	console.log(req.file);
 	await db.run("INSERT INTO guest (name, message, file) VALUES (?, ?, ?)", [req.body.name, req.body.message, req.file.buffer]);
 	res.sendFile(__dirname + "/guestTemplate.html");
 });

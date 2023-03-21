@@ -1,8 +1,9 @@
 import './App.css';
-import React from "react";
+import React, { useEffect } from "react";
 import {BrowserRouter as Router ,Routes, Route, Redirect } from "react-router-dom";
 import axios from "axios";
 import {useState} from "react";
+import {useParams} from "react-router-dom";
 function Organizer(){
   return (
     <>
@@ -26,25 +27,40 @@ function Organizer(){
   );
 };
 
-function Guest() {
+function Guest (){
+  const [eventName, setEventName] = useState('');
   const[name, setName] = useState('');
   const[message, setMessage] = useState('');
   const [file, setFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const eventID = useParams();
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8080/eventName/${eventID.eventID}`);
+        setEventName(response.data.event_name);
+        setLoading(false);
+      } catch(error) {
+        setSubmitError("unable to retrieve data from server");
+      }
+    };
+    fetch();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-    console.log("submitting");
     try{
       const formData = new FormData();
       formData.append('name', name);
       formData.append('message', message);
       formData.append('file', file);
       const response = await axios.post('http://localhost:8080/guest', formData);
-      console.log("post request sent");
       setSubmitSuccess(true);
     } catch (error) {
       setSubmitError(error.message);
@@ -52,10 +68,9 @@ function Guest() {
       setIsSubmitting(false);
     }
   };
-
   return (
     <>
-    <h1>Welcome to [Event Name]</h1>
+    <h1>Welcome to {eventName} </h1>
     <form onSubmit = {handleSubmit} id="guestForm" encType="multipart/form-data">
       <label htmlFor="name">First name:</label><br />
       <input type="text" id="name" name="name" onChange={(event) => setName(event.target.value)}/><br />
@@ -74,7 +89,7 @@ function App() {
     <Router>
     <Routes>
       <Route path = "/organizer" element ={<Organizer/>}/>
-      <Route path="/guest" element ={<Guest/>} />
+      <Route path="/guest/:eventID" element ={<Guest/>} />
     </Routes>
   </Router>
   );
