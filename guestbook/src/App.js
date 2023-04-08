@@ -4,18 +4,69 @@ import {BrowserRouter as Router ,Routes, Route, Redirect } from "react-router-do
 import axios from "axios";
 import {useState} from "react";
 import {useParams} from "react-router-dom";
+
+function GuestData({name, message, fileName}){
+  return(
+    <>
+    <h3>{name}</h3>
+    <p>{message}</p>
+    <img height="100" src={`\\images\\${fileName}`}></img>
+    </>
+  );
+}
+
+function Event(){
+  const[guestNames, setGuestNames] = useState([])
+  const eventID = useParams();
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/guestData/${eventID.eventID}`);
+        setGuestNames(response.data);
+      } catch(error){
+        console.log(error);
+      }
+    }
+    fetch();
+  }, []);
+  const guestNameElements = guestNames.map((object) => <GuestData key={object.id} name={object.name} message={object.message} fileName={object.file}/>);
+  return(
+    <>
+    <h1>Guests</h1>
+    <div>
+      <div>
+        {guestNameElements}
+      </div>
+    </div>
+    </>
+  );
+};
 function Organizer(){
+  const [eventData, setEventData] = useState([]);
+  const organizerID = useParams();
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/eventData/${organizerID.organizerID}`);
+        setEventData(response.data);
+      } catch(error) {
+        console.log(error);
+      }
+    };
+    fetch();
+  }, []);
+  const eventNameElements = eventData.map((object) => <h3 key={object.id}><a href={`../event/${object.id}`}>{object.eventName}</a></h3>)
   return (
     <>
     <h1>My Events</h1>
         <h2>Previous Events</h2>
-
         <div>
+            <div>{eventNameElements}</div>
             <div>
                 <h3><a href="">Name of previous event 1</a></h3>
                 <div>Event date: [date]</div>
             </div>
-
+  
             <div>
                 <h3><a href="">Name of previous event 1</a></h3>
                 <div>Event date: [date]</div>
@@ -42,8 +93,9 @@ function Guest (){
     const fetch = async () => {
       try {
         setLoading(true);
+        //getting the event name the guest is attending
         const response = await axios.get(`http://localhost:8080/eventName/${eventID.eventID}`);
-        setEventName(response.data.event_name);
+        setEventName(response.data.eventName);
         setLoading(false);
       } catch(error) {
         setSubmitError("unable to retrieve data from server");
@@ -60,7 +112,8 @@ function Guest (){
       formData.append('name', name);
       formData.append('message', message);
       formData.append('file', file);
-      const response = await axios.post('http://localhost:8080/guest', formData);
+      //submitting data guest inputed
+      const response = await axios.post(`http://localhost:8080/guest/${eventID.eventID}`, formData);
       setSubmitSuccess(true);
     } catch (error) {
       setSubmitError(error.message);
@@ -88,8 +141,9 @@ function App() {
   return (
     <Router>
     <Routes>
-      <Route path = "/organizer" element ={<Organizer/>}/>
+      <Route path = "/organizer/:organizerID" element ={<Organizer/>}/>
       <Route path="/guest/:eventID" element ={<Guest/>} />
+      <Route path="/event/:eventID" element ={<Event/>}/>
     </Routes>
   </Router>
   );
