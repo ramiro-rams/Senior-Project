@@ -4,7 +4,6 @@ const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
 const cors = require('cors');
 const multer = require('multer');
-const buffer = require('buffer');
 const uuid = require('uuid');
 
 PORT=8080;
