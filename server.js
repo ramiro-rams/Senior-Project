@@ -57,12 +57,6 @@ app.get("/eventName/:eventId", async (req, res) => {
 	const eventName = await db.get("SELECT eventName FROM event WHERE id = ?", eventId);
 	res.json(eventName);
 });
-//uploads data from guest into database
-app.post("/guest/:eventId", upload.single('file'), async(req, res) => {
-	const eventId = req.params.eventId;
-	await db.run("INSERT INTO guest (name, event_id, message, file) VALUES (?, ?, ?, ?)", [req.body.name, eventId, req.body.message, req.file.filename]);
-	res.sendFile(__dirname + "/guestTemplate.html");
-});
 
 //sends an event image unique name
 app.get("/eventImages/:eventId", async(req, res) => {
@@ -71,6 +65,7 @@ app.get("/eventImages/:eventId", async(req, res) => {
 	res.json(imgData);
 });
 
+//sends the eventNames and ids for a specified organizer
 app.get("/eventData/:organizerID", async(req, res) => {
 	const eventNames = await db.all("SELECT id, eventName FROM event WHERE organizerID = ?", req.params.organizerID);
 	res.json(eventNames);
@@ -78,5 +73,26 @@ app.get("/eventData/:organizerID", async(req, res) => {
 app.get("/guestData/:eventID", async(req, res) => {
 	const guestNames = await db.all("SELECT id, name, message, file FROM guest where event_id = ?", req.params.eventID);
 	res.json(guestNames);
+});
+
+//uploads data from guest into database
+app.post("/guest/:eventId", upload.single('file'), async(req, res) => {
+	const eventId = req.params.eventId;
+	await db.run("INSERT INTO guest (name, event_id, message, file) VALUES (?, ?, ?, ?)", [req.body.name, eventId, req.body.message, req.file.filename]);
+	res.sendFile(__dirname + "/guestTemplate.html");
+});
+
+app.post("/organizer/:id/eventCreation/:eventName", async(req, res) =>{
+	const eventName = req.params.eventName;
+	const eventID = req.params.id;
+	await db.run(`INSERT INTO event (eventName, organizerID) VALUES (?, ?) `,[eventName, eventID]);
+	res.send("success");
+});
+
+app.post("/organizer/eventDeletion/:eventID", async(req, res) =>{
+	const eventID = req.params.eventID;
+	await db.run(`DELETE FROM event WHERE id = ?`, eventID);
+	await db.run('DELETE FROM guest WHERE event_id = ?', eventID);
+	res.send("success");
 });
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
