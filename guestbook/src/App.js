@@ -5,6 +5,7 @@ import axios from "axios";
 import {useState} from "react";
 import {useParams} from "react-router-dom";
 import {v4 as uuidv4} from 'uuid';
+import bcrypt from 'bcryptjs'
 
 function Login(){
   const [username, setUsername] = useState('');
@@ -14,22 +15,22 @@ function Login(){
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/login', {
-        username: username,
-        password: password
-      });
-      if (response.data.success === true) {
-        const sessionID = uuidv4();
-        sessionStorage.setItem("sessionID", sessionID);
-        await axios.post('http://localhost:8080/sessionID', {
-          sessionID: sessionID,
-          organizerID: response.data.id
-        })
-        setLoginError(false);
-        navigate(`/organizer/${response.data.id}`)
-      } else {
-        setLoginError(true);
-      }
+      //gets the hashed password
+      const response = await axios.get(`http://localhost:8080/login/${username}`);
+      bcrypt.compare(password, response.data.password, async function(err, result) {
+        if (result === true) {
+          const sessionID = uuidv4();
+          sessionStorage.setItem("sessionID", sessionID);
+          await axios.post('http://localhost:8080/sessionID', {
+            sessionID: sessionID,
+            organizerID: response.data.id
+          })
+          setLoginError(false);
+          navigate(`/organizer/${response.data.id}`);
+        } else {
+          setLoginError(true);
+        }
+    });
     } catch (error) {
       console.error(error);
     }
@@ -64,24 +65,23 @@ function SignUp(){
     try{
       //checking if username is in database
       const usernameExists = await axios.get(`http://localhost:8080/username/${username}`);
-      console.log(usernameExists.data.username);
       if(usernameExists.data.username){
         setUserNameTaken(true);
-        console.log("usernameexits")
       }
       else{ 
         setUserNameTaken(false);
-        console.log("username does not exits")
       }
       if (password1 !== password2) {
         setPasswordMatchError(true);
       } else {
         setPasswordMatchError(false);
       }
-      console.log(userNameTaken);
-      console.log(passwordMatchError);
       if(userNameTaken === false && passwordMatchError === false){
-        await axios.post(`http://localhost:8080/signup/${username}/${password1}/${name}`);
+        //generating salt for encryption
+        const salt = bcrypt.genSaltSync(10)
+        //encrypting
+        const hashedPassword = bcrypt.hashSync(password1, salt)
+        await axios.post(`http://localhost:8080/signup/${username}/${hashedPassword}/${name}`);
         navigate("/login");
       }
 

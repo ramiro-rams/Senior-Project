@@ -86,6 +86,12 @@ app.get("/username/:username", async (req, res) => {
 	res.send(result);
 })
 
+app.get('/login/:username', async (req, res) => {
+	const username = req.params.username;
+	const row = await db.get('SELECT password, id FROM organizer WHERE username = ?', username);
+	res.send(row);
+});
+
 //uploads data from guest into database
 app.post("/guest/:eventId", upload.single('file'), async(req, res) => {
 	const eventId = req.params.eventId;
@@ -106,6 +112,7 @@ app.post("/organizer/eventDeletion/:eventID", async(req, res) =>{
 	await db.run('DELETE FROM guest WHERE event_id = ?', eventID);
 	res.send("success");
 });
+
 app.post("/signup/:username/:password/:name", async(req, res) =>{
 	const userName = req.params.username;
 	const password = req.params.password;
@@ -114,15 +121,6 @@ app.post("/signup/:username/:password/:name", async(req, res) =>{
 	res.send("success");
 })
 
-app.post('/login', async (req, res) => {
-	const { username, password } = req.body;
-	const row = await db.get('SELECT * FROM organizer WHERE username = ? AND password = ?', [username, password]);
-	if (!row) {
-		res.send('failure');
-	} else {
-		res.send({success: true, id: row.id});
-	  };
-  });
 app.post('/sessionID', async (req, res) => {
 	const sessionID = req.body.sessionID;
 	const organizerID = req.body.organizerID;
