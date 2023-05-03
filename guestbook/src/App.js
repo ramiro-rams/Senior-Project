@@ -1,9 +1,125 @@
 import './App.css';
 import React, { useEffect } from "react";
-import {BrowserRouter as Router ,Routes, Route, Redirect, redirect } from "react-router-dom";
+import {BrowserRouter as Router ,Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {useState} from "react";
 import {useParams} from "react-router-dom";
+import {v4 as uuidv4} from 'uuid';
+
+function Login(){
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
+  const navigate = useNavigate();
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:8080/login', {
+        username: username,
+        password: password
+      });
+      if (response.data.success === true) {
+        const sessionID = uuidv4();
+        sessionStorage.setItem("sessionID", sessionID);
+        await axios.post('http://localhost:8080/sessionID', {
+          sessionID: sessionID,
+          organizerID: response.data.id
+        })
+        setLoginError(false);
+        navigate(`/organizer/${response.data.id}`)
+      } else {
+        setLoginError(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  return (
+    <form onSubmit={handleLogin}>
+      <label>
+        Username:
+        <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} />
+      </label>
+      <label>
+        Password:
+        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+      </label>
+      {loginError && <div>Invalid username or password.</div>}
+      <button type="submit">Log In</button>
+    </form>
+  );
+};
+
+function SignUp(){
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password1, setPassword1] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [passwordMatchError, setPasswordMatchError] = useState(false);
+  const [userNameTaken, setUserNameTaken] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+    try{
+      //checking if username is in database
+      const usernameExists = await axios.get(`http://localhost:8080/username/${username}`);
+      console.log(usernameExists.data.username);
+      if(usernameExists.data.username){
+        setUserNameTaken(true);
+        console.log("usernameexits")
+      }
+      else{ 
+        setUserNameTaken(false);
+        console.log("username does not exits")
+      }
+      if (password1 !== password2) {
+        setPasswordMatchError(true);
+      } else {
+        setPasswordMatchError(false);
+      }
+      console.log(userNameTaken);
+      console.log(passwordMatchError);
+      if(userNameTaken === false && passwordMatchError === false){
+        await axios.post(`http://localhost:8080/signup/${username}/${password1}/${name}`);
+        navigate("/login");
+      }
+
+    }catch(error){
+      console.log(error);
+    }
+  }
+  return(
+    <>
+    <h1>SignUp</h1>
+    <form onSubmit={handleSignUp}>
+    <label>
+        Name:
+        <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
+      </label>
+      <br/>
+      <label>
+        Username:
+        <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} />
+      </label>
+      <br/>
+      <label>
+        Password:
+        <input type="password" value={password1} onChange={(event) => setPassword1(event.target.value)} />
+      </label>
+      <br/>
+      <label>
+        Confirm Password:
+        <input type="password" value={password2} onChange={(event) => setPassword2(event.target.value)} />
+      </label>
+      {passwordMatchError && <div>Passwords do not match.</div>}
+      {userNameTaken && <div>That username is already taken</div>}
+      <br/>
+      <button type="submit">Sign Up</button>
+    </form>
+    </>
+  );
+}
 
 function GuestData({name, message, fileName}){
   return(
@@ -46,6 +162,7 @@ function Organizer(){
   const [eventDataArr, setEventDataArr] = useState([]);
   const[eventNameElements, setEventNameElements] = useState([]);
   const organizerID = useParams();
+  const navigate = useNavigate();
 
   function createEventNameElement(eventData, index){
     const handleDelete = async()=>{
@@ -64,6 +181,11 @@ function Organizer(){
   useEffect(() => {
     const fetch = async () => {
       try {
+        const sessionID = sessionStorage.getItem("sessionID");
+        const sessionCheck = await axios.get(`http://localhost:8080/sessionID/${organizerID.organizerID}`);
+        if(sessionID !== sessionCheck.data.sessionID){
+          navigate(`/login`)
+        }
         //getting the event
         const response = await axios.get(`http://localhost:8080/eventData/${organizerID.organizerID}`);
         setEventDataArr(response.data);
@@ -183,6 +305,8 @@ function App() {
   return (
     <Router>
     <Routes>
+      <Route path="/login" element={<Login/>}/>
+      <Route path = "/signup" element={<SignUp/>}/>
       <Route path = "/organizer/:organizerID" element ={<Organizer/>}/>
       <Route path="/guest/:eventID" element ={<Guest/>} />
       <Route path="/event/:eventID" element ={<Event/>}/>

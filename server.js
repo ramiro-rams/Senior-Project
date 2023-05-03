@@ -74,6 +74,17 @@ app.get("/guestData/:eventID", async(req, res) => {
 	const guestNames = await db.all("SELECT id, name, message, file FROM guest where event_id = ?", req.params.eventID);
 	res.json(guestNames);
 });
+app.get("/sessionID/:organizerID", async(req, res) => {
+	const organizerID = req.params.organizerID;
+	const sessionID = await db.get("SELECT sessionID FROM organizer WHERE id = ?", organizerID);
+	res.send(sessionID);
+})
+
+app.get("/username/:username", async (req, res) => {
+	const username = req.params.username;
+	const result = await db.get("SELECT username FROM organizer WHERE username = ?", username);
+	res.send(result);
+})
 
 //uploads data from guest into database
 app.post("/guest/:eventId", upload.single('file'), async(req, res) => {
@@ -95,4 +106,27 @@ app.post("/organizer/eventDeletion/:eventID", async(req, res) =>{
 	await db.run('DELETE FROM guest WHERE event_id = ?', eventID);
 	res.send("success");
 });
+app.post("/signup/:username/:password/:name", async(req, res) =>{
+	const userName = req.params.username;
+	const password = req.params.password;
+	const name = req.params.name;
+	const response = await db.run(`INSERT INTO organizer (username, password, name) VALUES(?, ?, ?)`, [userName, password, name]);
+	res.send("success");
+})
+
+app.post('/login', async (req, res) => {
+	const { username, password } = req.body;
+	const row = await db.get('SELECT * FROM organizer WHERE username = ? AND password = ?', [username, password]);
+	if (!row) {
+		res.send('failure');
+	} else {
+		res.send({success: true, id: row.id});
+	  };
+  });
+app.post('/sessionID', async (req, res) => {
+	const sessionID = req.body.sessionID;
+	const organizerID = req.body.organizerID;
+	const response = await db.run("UPDATE organizer SET sessionID = ? WHERE id = ?", [sessionID, organizerID]);
+	res.send("success");
+})
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
