@@ -32,17 +32,17 @@ function Login(){
       const response = await axios.get(`http://localhost:8080/login/${username}`);
       bcrypt.compare(password, response.data.password, async function(err, result) {
         if (result === true) {
-          const sessionID = uuidv4();
-          sessionStorage.setItem("sessionID", sessionID);
-          await axios.post('http://localhost:8080/sessionID', {
-            sessionID: sessionID,
-            organizerID: response.data.id
-          })
-          setLoginError(false);
+        const sessionID = uuidv4();
+        sessionStorage.setItem("sessionID", sessionID);
+        await axios.post('http://localhost:8080/sessionID', {
+          sessionID: sessionID,
+          organizerID: response.data.id
+        })
+        setLoginError(false);
           navigate(`/organizer/${response.data.id}`);
-        } else {
-          setLoginError(true);
-        }
+      } else {
+        setLoginError(true);
+      }
     });
     } catch (error) {
       console.error(error);
@@ -92,7 +92,7 @@ function SignUp(){
         setPasswordMatchError(true);
       } else {
         setPasswordMatchError(false);
-      }      
+      }
     }catch(error){
       console.log(error);
     }
@@ -112,12 +112,12 @@ function SignUp(){
             hashedPassword: hashedPassword,
             name: name
           });
-          navigate("/login");
-        }
-      }catch(error){
-        console.log(error)
+        navigate("/login");
       }
+    }catch(error){
+        console.log(error)
     }
+  }
     fetch();
   }, [passwordMatchError, userNameTaken])
   return(
@@ -164,7 +164,8 @@ function GuestData({name, message, fileName}){
 
 function Event(){
   const[guestNames, setGuestNames] = useState([]);
-  const eventID = useParams();
+  const params = useParams();
+  const navigate = useNavigate();
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -185,7 +186,7 @@ function Event(){
   return(
     <>
     <div>
-      <h1>Guests</h1>
+    <h1>Guests</h1>
     <div>
       <div>
         {guestNameElements}
@@ -376,7 +377,7 @@ function App() {
       <Route path = "/signup" element={<SignUp/>}/>
       <Route path = "/organizer/:organizerID" element ={<Organizer/>}/>
       <Route path="/guest/:eventID" element ={<Guest/>} />
-      <Route path="/event/:eventID" element ={<Event/>}/>
+      <Route path="/event/:eventID/:organizerID" element ={<Event/>}/>
       <Route path="/welcome" element ={<Welcome/>}/>
     </Routes>
   </Router>
