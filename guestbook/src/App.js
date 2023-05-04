@@ -3,10 +3,23 @@ import React, { useEffect } from "react";
 import {BrowserRouter as Router ,Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {useState} from "react";
-import {useParams} from "react-router-dom";
+import {useParams, Link} from "react-router-dom";
 import {v4 as uuidv4} from 'uuid';
 import bcrypt from 'bcryptjs'
 
+function Welcome(){
+  return(
+    <>
+    <h1>Welcome to Guestbook</h1>
+    <Link to="/login">
+    <button>Login</button>
+    </Link>
+    <Link to="/signup">
+    <button>Signup</button>
+    </Link>
+    </>
+  )
+}
 function Login(){
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -19,17 +32,17 @@ function Login(){
       const response = await axios.get(`http://localhost:8080/login/${username}`);
       bcrypt.compare(password, response.data.password, async function(err, result) {
         if (result === true) {
-          const sessionID = uuidv4();
-          sessionStorage.setItem("sessionID", sessionID);
-          await axios.post('http://localhost:8080/sessionID', {
-            sessionID: sessionID,
-            organizerID: response.data.id
-          })
-          setLoginError(false);
+        const sessionID = uuidv4();
+        sessionStorage.setItem("sessionID", sessionID);
+        await axios.post('http://localhost:8080/sessionID', {
+          sessionID: sessionID,
+          organizerID: response.data.id
+        })
+        setLoginError(false);
           navigate(`/organizer/${response.data.id}`);
-        } else {
-          setLoginError(true);
-        }
+      } else {
+        setLoginError(true);
+      }
     });
     } catch (error) {
       console.error(error);
@@ -79,7 +92,7 @@ function SignUp(){
         setPasswordMatchError(true);
       } else {
         setPasswordMatchError(false);
-      }      
+      }
     }catch(error){
       console.log(error);
     }
@@ -99,12 +112,12 @@ function SignUp(){
             hashedPassword: hashedPassword,
             name: name
           });
-          navigate("/login");
-        }
-      }catch(error){
-        console.log(error)
+        navigate("/login");
       }
+    }catch(error){
+        console.log(error)
     }
+  }
     fetch();
   }, [passwordMatchError, userNameTaken])
   return(
@@ -150,14 +163,9 @@ function GuestData({name, message, fileName}){
 }
 
 function Event(){
-<<<<<<< HEAD
-  const[guestNames, setGuestNames] = useState([])
+  const[guestNames, setGuestNames] = useState([]);
   const params = useParams();
   const navigate = useNavigate();
-=======
-  const[guestNames, setGuestNames] = useState([]);
-  const eventID = useParams();
->>>>>>> f54106135cc20bfcab4749a8eb59449e9c5db047
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -178,7 +186,7 @@ function Event(){
   return(
     <>
     <div>
-      <h1>Guests</h1>
+    <h1>Guests</h1>
     <div>
       <div>
         {guestNameElements}
@@ -370,6 +378,7 @@ function App() {
       <Route path = "/organizer/:organizerID" element ={<Organizer/>}/>
       <Route path="/guest/:eventID" element ={<Guest/>} />
       <Route path="/event/:eventID/:organizerID" element ={<Event/>}/>
+      <Route path="/welcome" element ={<Welcome/>}/>
     </Routes>
   </Router>
   );
