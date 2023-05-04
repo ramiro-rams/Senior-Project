@@ -9,15 +9,22 @@ import bcrypt from 'bcryptjs'
 
 function Welcome(){
   return(
-    <>
-    <h1>Welcome to Guestbook</h1>
-    <Link to="/login">
-    <button>Login</button>
-    </Link>
-    <Link to="/signup">
-    <button>Signup</button>
-    </Link>
-    </>
+
+    <div class="container">
+        <h1>Welcome to Guestbook</h1>
+	    <p>This platform lets you create virtual guestbooks for your most important events.</p> 
+        <p>Whether you're planning a wedding, a funeral, an art gallery, or a party, Guestbook makes it easy for you to create a digital space where your guests can leave their well wishes, share their memories, and celebrate with you.</p>
+        <p>To get started, simply sign in if you already have an account, or sign up if you're new to Guestbook. With our user-friendly platform, you'll be able to create and customize your guestbook in no time, and invite your guests to start leaving their messages. We can't wait to help you make your event even more special with Guestbook.</p>
+      
+        <Link to="/login">
+	    <button class="signin-btn">Sign In</button>
+      </Link>
+      <Link to="/signup">
+      <button class="signup-btn">Sign Up</button>
+      </Link>
+
+
+    </div>
   )
 }
 function Login(){
