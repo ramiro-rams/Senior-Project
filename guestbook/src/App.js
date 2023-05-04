@@ -3,9 +3,22 @@ import React, { useEffect } from "react";
 import {BrowserRouter as Router ,Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {useState} from "react";
-import {useParams} from "react-router-dom";
+import {useParams, Link} from "react-router-dom";
 import {v4 as uuidv4} from 'uuid';
 
+function Welcome(){
+  return(
+    <>
+    <h1>Welcome to Guestbook</h1>
+    <Link to="/login">
+    <button>Login</button>
+    </Link>
+    <Link to="/signup">
+    <button>Signup</button>
+    </Link>
+    </>
+  )
+}
 function Login(){
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -310,6 +323,7 @@ function App() {
       <Route path = "/organizer/:organizerID" element ={<Organizer/>}/>
       <Route path="/guest/:eventID" element ={<Guest/>} />
       <Route path="/event/:eventID" element ={<Event/>}/>
+      <Route path="/welcome" element ={<Welcome/>}/>
     </Routes>
   </Router>
   );
