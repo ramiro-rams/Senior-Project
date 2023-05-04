@@ -5,6 +5,7 @@ import axios from "axios";
 import {useState} from "react";
 import {useParams} from "react-router-dom";
 import {v4 as uuidv4} from 'uuid';
+import bcrypt from 'bcryptjs'
 
 function Login(){
   const [username, setUsername] = useState('');
@@ -14,22 +15,22 @@ function Login(){
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/login', {
-        username: username,
-        password: password
-      });
-      if (response.data.success === true) {
-        const sessionID = uuidv4();
-        sessionStorage.setItem("sessionID", sessionID);
-        await axios.post('http://localhost:8080/sessionID', {
-          sessionID: sessionID,
-          organizerID: response.data.id
-        })
-        setLoginError(false);
-        navigate(`/organizer/${response.data.id}`)
-      } else {
-        setLoginError(true);
-      }
+      //gets the hashed password
+      const response = await axios.get(`http://localhost:8080/login/${username}`);
+      bcrypt.compare(password, response.data.password, async function(err, result) {
+        if (result === true) {
+          const sessionID = uuidv4();
+          sessionStorage.setItem("sessionID", sessionID);
+          await axios.post('http://localhost:8080/sessionID', {
+            sessionID: sessionID,
+            organizerID: response.data.id
+          })
+          setLoginError(false);
+          navigate(`/organizer/${response.data.id}`);
+        } else {
+          setLoginError(true);
+        }
+    });
     } catch (error) {
       console.error(error);
     }
@@ -55,10 +56,11 @@ function SignUp(){
   const [username, setUsername] = useState('');
   const [password1, setPassword1] = useState('');
   const [password2, setPassword2] = useState('');
-  const [passwordMatchError, setPasswordMatchError] = useState(false);
-  const [userNameTaken, setUserNameTaken] = useState(false);
+  const [passwordMatchError, setPasswordMatchError] = useState();
+  const [userNameTaken, setUserNameTaken] = useState();
   const navigate = useNavigate();
 
+  console.log(userNameTaken);
   const handleSignUp = async (event) => {
     event.preventDefault();
     try{
@@ -67,28 +69,44 @@ function SignUp(){
       console.log(usernameExists.data.username);
       if(usernameExists.data.username){
         setUserNameTaken(true);
-        console.log("usernameexits")
+        console.log("username taken = " + userNameTaken);
       }
       else{ 
         setUserNameTaken(false);
-        console.log("username does not exits")
+        console.log("username taken = " + userNameTaken);
       }
       if (password1 !== password2) {
         setPasswordMatchError(true);
       } else {
         setPasswordMatchError(false);
-      }
-      console.log(userNameTaken);
-      console.log(passwordMatchError);
-      if(userNameTaken === false && passwordMatchError === false){
-        await axios.post(`http://localhost:8080/signup/${username}/${password1}/${name}`);
-        navigate("/login");
-      }
-
+      }      
     }catch(error){
       console.log(error);
     }
   }
+  useEffect(() =>{
+    const fetch = async() =>{
+      try{
+        //do this if username is not taken and both passwords match
+        if(userNameTaken == false && passwordMatchError == false){
+          //generating salt for encryption
+          console.log("username taken = " + userNameTaken)
+          const salt = bcrypt.genSaltSync(10)
+          //encrypting
+          const hashedPassword = bcrypt.hashSync(password1, salt)
+          await axios.post(`http://localhost:8080/signup`, {
+            username: username,
+            hashedPassword: hashedPassword,
+            name: name
+          });
+          navigate("/login");
+        }
+      }catch(error){
+        console.log(error)
+      }
+    }
+    fetch();
+  }, [passwordMatchError, userNameTaken])
   return(
     <>
     <h1>SignUp</h1>
@@ -132,9 +150,14 @@ function GuestData({name, message, fileName}){
 }
 
 function Event(){
+<<<<<<< HEAD
   const[guestNames, setGuestNames] = useState([])
   const params = useParams();
   const navigate = useNavigate();
+=======
+  const[guestNames, setGuestNames] = useState([]);
+  const eventID = useParams();
+>>>>>>> f54106135cc20bfcab4749a8eb59449e9c5db047
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -154,19 +177,22 @@ function Event(){
   const guestNameElements = guestNames.map((object) => <GuestData key={object.id} name={object.name} message={object.message} fileName={object.file}/>);
   return(
     <>
-    <h1>Guests</h1>
+    <div>
+      <h1>Guests</h1>
     <div>
       <div>
         {guestNameElements}
       </div>
-    </div>
+    </div></div>
     </>
+    
   );
 };
 function Organizer(){
   const [eventName, setEventName] = useState('');
   const [eventDataArr, setEventDataArr] = useState([]);
   const[eventNameElements, setEventNameElements] = useState([]);
+  const [code, setCode] = useState();
   const organizerID = useParams();
   const navigate = useNavigate();
 
@@ -214,7 +240,7 @@ function Organizer(){
     event.preventDefault();
     try{
       //inserting new event into database
-      const post = await axios.post(`http://localhost:8080/organizer/${organizerID.organizerID}/eventCreation/${eventName}`)
+      const post = await axios.post(`http://localhost:8080/organizer/${organizerID.organizerID}/eventCreation/${eventName}/${code}`)
       //getting the new array of events in the database
       const response = await axios.get(`http://localhost:8080/eventData/${organizerID.organizerID}`);
       setEventDataArr(response.data);
@@ -224,8 +250,11 @@ function Organizer(){
     }
   };
 
-  const handleChange = async(event) => {
+  const handleNameChange = async(event) => {
     setEventName(event.target.value);
+  }
+  const handleCodeChange = async(event) => {
+    setCode(event.target.value);
   }
   
   return (
@@ -240,7 +269,12 @@ function Organizer(){
         <label htmlFor="Name">
           Event Name:
         </label>
-        <input id="Name" type="text" onChange={handleChange}></input>
+        <input id="Name" type="text" onChange={handleNameChange}></input>
+        <br></br>
+        <label htmlFor="AccessCode">
+          Access Code:
+        </label>
+        <input id="AccessCode" type="text" onChange={handleCodeChange}></input>
         <br></br>
         <button disabled={!eventName}>Submit</button>
         </form>
@@ -257,6 +291,9 @@ function Guest (){
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const[accessCode, setAccessCode] = useState('');
+  const[validAccessCode, setValidAccessCode] = useState('');
+  const[codeAccessValid, setCodeAccessValid] = useState(false);
 
   const eventID = useParams();
   useEffect(() => {
@@ -265,6 +302,8 @@ function Guest (){
         setLoading(true);
         //getting the event name the guest is attending
         const response = await axios.get(`http://localhost:8080/eventName/${eventID.eventID}`);
+        const validCode= await axios.get(`http://localhost:8080/accessCode/${eventID.eventID}`);
+        setValidAccessCode(validCode.data.accessCode);
         setEventName(response.data.eventName);
         setLoading(false);
       } catch(error) {
@@ -273,7 +312,12 @@ function Guest (){
     };
     fetch();
   }, []);
-
+  const handleAccessCodeSubmit = (event) => {
+    event.preventDefault();
+    if(validAccessCode == accessCode){
+      setCodeAccessValid(true);
+    }
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -293,7 +337,17 @@ function Guest (){
   };
   return (
     <>
-    <h1>Welcome to {eventName} </h1>
+    {
+      !codeAccessValid && 
+      <form onSubmit={handleAccessCodeSubmit}>
+      <label>
+        Access Code:
+        <input type="text" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} />
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+    }
+    {codeAccessValid && <div><h1>Welcome to {eventName} </h1>
     <form onSubmit = {handleSubmit} id="guestForm" encType="multipart/form-data">
       <label htmlFor="name">First name:</label><br />
       <input type="text" id="name" name="name" onChange={(event) => setName(event.target.value)}/><br />
@@ -302,7 +356,7 @@ function Guest (){
       <label htmlFor="media">Upload media here:</label><br />
       <input type="file" onChange = {(event) => setFile(event.target.files[0])}/><br />
       <button type="submit" form="guestForm" disabled={isSubmitting}>Submit</button>
-    </form>
+    </form></div>}
   </>
   );
 }
