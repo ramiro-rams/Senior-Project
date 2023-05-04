@@ -70,10 +70,16 @@ app.get("/eventData/:organizerID", async(req, res) => {
 	const eventNames = await db.all("SELECT id, eventName FROM event WHERE organizerID = ?", req.params.organizerID);
 	res.json(eventNames);
 });
+//sends the guestData(id, name, message and files)
 app.get("/guestData/:eventID", async(req, res) => {
 	const guestNames = await db.all("SELECT id, name, message, file FROM guest where event_id = ?", req.params.eventID);
 	res.json(guestNames);
 });
+app.get("/accessCode/:eventID", async(req, res) => {
+	const accessCode = await db.get("SELECT accessCode FROM event WHERE id = ?", req.params.eventID);
+	res.json(accessCode);
+});
+
 app.get("/sessionID/:organizerID", async(req, res) => {
 	const organizerID = req.params.organizerID;
 	const sessionID = await db.get("SELECT sessionID FROM organizer WHERE id = ?", organizerID);
@@ -99,10 +105,11 @@ app.post("/guest/:eventId", upload.single('file'), async(req, res) => {
 	res.sendFile(__dirname + "/guestTemplate.html");
 });
 
-app.post("/organizer/:id/eventCreation/:eventName", async(req, res) =>{
+app.post("/organizer/:id/eventCreation/:eventName/:accessCode", async(req, res) =>{
 	const eventName = req.params.eventName;
 	const eventID = req.params.id;
-	await db.run(`INSERT INTO event (eventName, organizerID) VALUES (?, ?) `,[eventName, eventID]);
+	const accessCode = req.params.accessCode;
+	await db.run(`INSERT INTO event (eventName, organizerID, accessCode) VALUES (?, ?, ?) `,[eventName, eventID, accessCode]);
 	res.send("success");
 });
 
@@ -113,11 +120,11 @@ app.post("/organizer/eventDeletion/:eventID", async(req, res) =>{
 	res.send("success");
 });
 
-app.post("/signup/:username/:password/:name", async(req, res) =>{
-	const userName = req.params.username;
-	const password = req.params.password;
-	const name = req.params.name;
-	const response = await db.run(`INSERT INTO organizer (username, password, name) VALUES(?, ?, ?)`, [userName, password, name]);
+app.post("/signup", async(req, res) =>{
+	const userName = req.body.username;
+	const hashedPassword = req.body.hashedPassword;
+	const name = req.body.name;
+	const response = await db.run(`INSERT INTO organizer (username, password, name) VALUES(?, ?, ?)`, [userName, hashedPassword, name]);
 	res.send("success");
 })
 
