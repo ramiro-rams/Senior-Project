@@ -133,11 +133,17 @@ function GuestData({name, message, fileName}){
 
 function Event(){
   const[guestNames, setGuestNames] = useState([])
-  const eventID = useParams();
+  const params = useParams();
+  const navigate = useNavigate();
   useEffect(() => {
     const fetch = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/guestData/${eventID.eventID}`);
+        const sessionID = sessionStorage.getItem("sessionID");
+        const sessionCheck = await axios.get(`http://localhost:8080/sessionID/${params.organizerID}`);
+        if(sessionID !== sessionCheck.data.sessionID){
+          navigate(`/login`)
+        }
+        const response = await axios.get(`http://localhost:8080/guestData/${params.eventID}`);
         setGuestNames(response.data);
       } catch(error){
         console.log(error);
@@ -175,7 +181,7 @@ function Organizer(){
           console.log(error);
         }
     };
-    return <div key={eventData.id}> <h3><a href={`../event/${eventData.id}`}>{eventData.eventName}</a></h3><button onClick={handleDelete}>Delete</button></div>
+    return <div key={eventData.id}> <h3><a href={`../event/${eventData.id}/${organizerID.organizerID}`}>{eventData.eventName}</a></h3><button onClick={handleDelete}>Delete</button></div>
   };
   //getting the event data and setting the states for the first time
   useEffect(() => {
@@ -309,7 +315,7 @@ function App() {
       <Route path = "/signup" element={<SignUp/>}/>
       <Route path = "/organizer/:organizerID" element ={<Organizer/>}/>
       <Route path="/guest/:eventID" element ={<Guest/>} />
-      <Route path="/event/:eventID" element ={<Event/>}/>
+      <Route path="/event/:eventID/:organizerID" element ={<Event/>}/>
     </Routes>
   </Router>
   );
