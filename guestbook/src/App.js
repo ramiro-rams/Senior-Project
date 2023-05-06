@@ -156,9 +156,9 @@ function SignUp(){
 function GuestData({name, message, fileData}){
 
   const handleDownload = async () => {
-    fileData.forEach((data) => {
+    fileData.forEach((data, index) => {
       const link = document.createElement('a');
-      link.download = data.fileName;
+      link.download = `guest_${name}_${index}`;
       link.href = `\\images\\${data.fileName}`;
       link.click();
     });
