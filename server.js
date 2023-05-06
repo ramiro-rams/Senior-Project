@@ -104,11 +104,13 @@ app.get('/login/:username', async (req, res) => {
 
 //uploads data from guest into database
 app.post("/guest/:eventId", upload.array('file'), async(req, res) => {
+	console.log("inserting media files");
 	const eventId = req.params.eventId;
 	const response = await db.run("INSERT INTO guest (name, event_id, message) VALUES (?, ?, ?)", [req.body.name, eventId, req.body.message]);
 	for(let i = 0; i < req.files.length; ++i){
 		await db.run("INSERT INTO media (fileName, eventID, guestID) VALUES (?, ?, ?)", [req.files[i].filename, eventId, response.lastID]);
 	}
+	console.log("media files inerted");
 	res.sendFile(__dirname + "/guestTemplate.html");
 });
 
