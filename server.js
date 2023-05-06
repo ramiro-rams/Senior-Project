@@ -72,8 +72,12 @@ app.get("/eventData/:organizerID", async(req, res) => {
 });
 //sends the guestData(id, name, message and files)
 app.get("/guestData/:eventID", async(req, res) => {
-	const guestNames = await db.all("SELECT id, name, message, file FROM guest where event_id = ?", req.params.eventID);
-	res.json(guestNames);
+	const guestData = await db.all("SELECT id, name, message FROM guest where event_id = ?", req.params.eventID);
+	for(let i = 0; i < guestData.length; ++i){
+		const fileData = await db.all("SELECT fileName, ID FROM media WHERE eventID = ? AND guestID = ?", [req.params.eventID, guestData[i].id])
+		guestData[i]['fileData'] = fileData;
+	}
+	res.json(guestData);
 });
 app.get("/accessCode/:eventID", async(req, res) => {
 	const accessCode = await db.get("SELECT accessCode FROM event WHERE id = ?", req.params.eventID);
@@ -99,9 +103,14 @@ app.get('/login/:username', async (req, res) => {
 });
 
 //uploads data from guest into database
-app.post("/guest/:eventId", upload.single('file'), async(req, res) => {
+app.post("/guest/:eventId", upload.array('file'), async(req, res) => {
+	console.log("inserting media files");
 	const eventId = req.params.eventId;
-	await db.run("INSERT INTO guest (name, event_id, message, file) VALUES (?, ?, ?, ?)", [req.body.name, eventId, req.body.message, req.file.filename]);
+	const response = await db.run("INSERT INTO guest (name, event_id, message) VALUES (?, ?, ?)", [req.body.name, eventId, req.body.message]);
+	for(let i = 0; i < req.files.length; ++i){
+		await db.run("INSERT INTO media (fileName, eventID, guestID) VALUES (?, ?, ?)", [req.files[i].filename, eventId, response.lastID]);
+	}
+	console.log("media files inerted");
 	res.sendFile(__dirname + "/guestTemplate.html");
 });
 

@@ -79,21 +79,16 @@ function SignUp(){
   const [passwordMatchError, setPasswordMatchError] = useState();
   const [userNameTaken, setUserNameTaken] = useState();
   const navigate = useNavigate();
-
-  console.log(userNameTaken);
   const handleSignUp = async (event) => {
     event.preventDefault();
     try{
       //checking if username is in database
       const usernameExists = await axios.get(`http://localhost:8080/username/${username}`);
-      console.log(usernameExists.data.username);
       if(usernameExists.data.username){
         setUserNameTaken(true);
-        console.log("username taken = " + userNameTaken);
       }
       else{ 
         setUserNameTaken(false);
-        console.log("username taken = " + userNameTaken);
       }
       if (password1 !== password2) {
         setPasswordMatchError(true);
@@ -110,7 +105,6 @@ function SignUp(){
         //do this if username is not taken and both passwords match
         if(userNameTaken == false && passwordMatchError == false){
           //generating salt for encryption
-          console.log("username taken = " + userNameTaken)
           const salt = bcrypt.genSaltSync(10)
           //encrypting
           const hashedPassword = bcrypt.hashSync(password1, salt)
@@ -159,18 +153,18 @@ function SignUp(){
   );
 }
 
-function GuestData({name, message, fileName}){
+function GuestData({name, message, fileData}){
   return(
     <>
     <h3>{name}</h3>
     <p>{message}</p>
-    <img height="100" src={`\\images\\${fileName}`}></img>
+    {fileData.map((data) => <img key ={data.ID} height="100" src={`\\images\\${data.fileName}`}></img>)}
     </>
   );
 }
 
 function Event(){
-  const[guestNames, setGuestNames] = useState([]);
+  const[guestData, setGuestData] = useState([]);
   const params = useParams();
   const navigate = useNavigate();
   useEffect(() => {
@@ -182,14 +176,14 @@ function Event(){
           navigate(`/login`)
         }
         const response = await axios.get(`http://localhost:8080/guestData/${params.eventID}`);
-        setGuestNames(response.data);
+        setGuestData(response.data);
       } catch(error){
         console.log(error);
       }
     }
     fetch();
   }, []);
-  const guestNameElements = guestNames.map((object) => <GuestData key={object.id} name={object.name} message={object.message} fileName={object.file}/>);
+  const guestNameElements = guestData.map((object) => <GuestData key={object.id} name={object.name} message={object.message} fileData={object.fileData}/>);
   return(
     <>
     <div>
@@ -310,6 +304,7 @@ function Guest (){
   const[validAccessCode, setValidAccessCode] = useState('');
   const[codeAccessValid, setCodeAccessValid] = useState(false);
 
+
   const eventID = useParams();
   useEffect(() => {
     const fetch = async () => {
@@ -340,7 +335,9 @@ function Guest (){
       const formData = new FormData();
       formData.append('name', name);
       formData.append('message', message);
-      formData.append('file', file);
+      for(let i = 0; i < file.length; ++i){
+        formData.append('file', file[i]);
+      }
       //submitting data guest inputed
       const response = await axios.post(`http://localhost:8080/guest/${eventID.eventID}`, formData);
       setSubmitSuccess(true);
@@ -369,7 +366,7 @@ function Guest (){
       <label htmlFor="message">Type message here:</label><br />
       <textarea id="message" name="message" rows="4" cols="50" onChange={(event) => setMessage(event.target.value)}></textarea><br />
       <label htmlFor="media">Upload media here:</label><br />
-      <input type="file" onChange = {(event) => setFile(event.target.files[0])}/><br />
+      <input multiple type="file" onChange = {(event) => setFile(event.target.files)}/><br />
       <button type="submit" form="guestForm" disabled={isSubmitting}>Submit</button>
     </form></div>}
   </>
