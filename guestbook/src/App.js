@@ -154,10 +154,20 @@ function SignUp(){
 }
 
 function GuestData({name, message, fileData}){
+
+  const handleDownload = async () => {
+    fileData.forEach((data, index) => {
+      const link = document.createElement('a');
+      link.download = `guest_${name}_${index}`;
+      link.href = `\\images\\${data.fileName}`;
+      link.click();
+    });
+  }
   return(
     <>
     <h3>{name}</h3>
     <p>{message}</p>
+    <button onClick={handleDownload}>Download Images</button><br></br>
     {fileData.map((data) => <img key ={data.ID} height="100" src={`\\images\\${data.fileName}`}></img>)}
     </>
   );
