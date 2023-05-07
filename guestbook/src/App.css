@@ -162,3 +162,38 @@ button:hover:before {
   color: #000;
   box-shadow: none;
 }
+
+.guestData {
+background-color: #FFFFFF;
+color: #000000;
+}
+
+.guestData h3 {
+color: #CBA135;
+}
+
+.guestData button {
+background-color: #CBA135;
+color: #FFFFFF;
+border: none;
+padding: 5px;
+margin-top: 10px;
+}
+
+.guestData button:hover {
+background-color: #FFFFFF;
+color: #CBA135;
+cursor: pointer;
+}
+
+.guestData img {
+  width: 100%;
+  height: 200px;
+}
+
+.images{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* center items horizontally */
+  align-items: end; /* center items vertically */
+}
