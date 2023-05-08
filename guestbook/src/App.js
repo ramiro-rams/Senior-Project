@@ -252,7 +252,7 @@ function Event(){
     <>
     <div>
       <h1>Guests</h1>
-      {!(guestData.length > 0) && <h2>Once the guests upload their submitions, you will see the content here.</h2>}
+      {!(guestData.length > 0) && <h2>Once the guests upload their submissions, you will see the content here.</h2>}
       <div>
         {guestData.length > 0 &&
         <div>
