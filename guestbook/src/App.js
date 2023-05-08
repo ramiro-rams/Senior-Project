@@ -9,21 +9,17 @@ import bcrypt from 'bcryptjs'
 
 function Welcome(){
   return(
-
-    <div class="container">
-        <h1>Welcome to Guestbook</h1>
-	    <p>This platform lets you create virtual guestbooks for your most important events.</p> 
-        <p>Whether you're planning a wedding, a funeral, an art gallery, or a party, Guestbook makes it easy for you to create a digital space where your guests can leave their well wishes, share their memories, and celebrate with you.</p>
-        <p>To get started, simply sign in if you already have an account, or sign up if you're new to Guestbook. With our user-friendly platform, you'll be able to create and customize your guestbook in no time, and invite your guests to start leaving their messages. We can't wait to help you make your event even more special with Guestbook.</p>
-      
-        <Link to="/login">
-	    <button class="signin-btn">Sign In</button>
+    <div className="containerWelcome">
+      <h1>Welcome to Guestbook</h1>
+      <p>This platform lets you create virtual guestbooks for your most important events.</p> 
+      <p>Whether you're planning a wedding, a funeral, an art gallery, or a party, Guestbook makes it easy for you to create a digital space where your guests can leave their well wishes, share their memories, and celebrate with you.</p>
+      <p>To get started, simply sign in if you already have an account, or sign up if you're new to Guestbook. With our user-friendly platform, you'll be able to create your guestbook in no time, and invite your guests to start leaving their messages. We can't wait to help you make your event even more special with Guestbook.</p>
+      <Link to="/login">
+        <button className="styled-btn">Sign In</button>
       </Link>
       <Link to="/signup">
-      <button class="signup-btn">Sign Up</button>
+        <button className="styled-btn">Sign Up</button>
       </Link>
-
-
     </div>
   )
 }
@@ -56,18 +52,26 @@ function Login(){
     }
   }
   return (
-    <form onSubmit={handleLogin}>
-      <label>
-        Username:
-        <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} />
-      </label>
-      <label>
-        Password:
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-      </label>
-      {loginError && <div>Invalid username or password.</div>}
-      <button type="submit">Log In</button>
-    </form>
+    <>
+      <nav className="navbar">
+        <div className="navbar__logo"><a href="./welcome">Guestbook</a></div>
+      </nav>
+
+      <div className="container">
+        <form onSubmit={handleLogin}>
+          <label>
+            Username:
+            <input type="text" id="username" name="username" placeholder="Enter your username" value={username} onChange={(event) => setUsername(event.target.value)}/>
+          </label>
+          <label>
+            Password:
+            <input type="password" id="password" name="password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)}/>
+          </label>
+          {loginError && <div>Invalid username or password.</div>}
+          <button className="styled-btn" type="submit">Log In</button>
+        </form>
+      </div>
+    </>
   );
 };
 
@@ -123,32 +127,38 @@ function SignUp(){
   }, [passwordMatchError, userNameTaken])
   return(
     <>
-    <h1>SignUp</h1>
-    <form onSubmit={handleSignUp}>
-    <label>
-        Name:
-        <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
-      </label>
-      <br/>
-      <label>
-        Username:
-        <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} />
-      </label>
-      <br/>
-      <label>
-        Password:
-        <input type="password" value={password1} onChange={(event) => setPassword1(event.target.value)} />
-      </label>
-      <br/>
-      <label>
-        Confirm Password:
-        <input type="password" value={password2} onChange={(event) => setPassword2(event.target.value)} />
-      </label>
-      {passwordMatchError && <div>Passwords do not match.</div>}
-      {userNameTaken && <div>That username is already taken</div>}
-      <br/>
-      <button type="submit">Sign Up</button>
-    </form>
+      <nav className="navbar">
+        <div className="navbar__logo"><a href="./welcome">Guestbook</a></div>
+      </nav>
+
+      <div className="container">
+        <form onSubmit={handleSignUp}>
+          <label>
+            Name:
+            <input type="text" value={name} placeholder="Full name" onChange={(event) => setName(event.target.value)}/>
+          </label>
+
+          <label>
+            Username:
+            <input type="text" value={username} placeholder="Username" onChange={(event) => setUsername(event.target.value)}/>
+          </label>
+
+          <label>
+            Password:
+            <input type="password" value={password1} placeholder="Password" onChange={(event) => setPassword1(event.target.value)}/>
+          </label>
+
+          <label>
+            Confirm Password:
+            <input type="password" value={password2} placeholder="Confirm" onChange={(event) => setPassword2(event.target.value)} />
+          </label>
+
+          {passwordMatchError && <div>Passwords do not match.</div>}
+          {userNameTaken && <div>That username is already taken.</div>}
+
+          <button type="submit" className="styled-btn">Sign Up</button>
+        </form>
+      </div>
     </>
   );
 }
@@ -191,10 +201,10 @@ function GuestData({guestID, name, message, fileData, manageContentToggled}){
     }
   }
   return(
-    <div className='guestData'>
+    <div className="container">
     {name != null && <h3 id={`name_${guestID}`}>{name} {manageContentToggled && <button onClick={() => handleDeleteName(guestID)}>Delete</button>}</h3>}
     {message != null && <p id={`message_${guestID}`}>{message}{manageContentToggled && <button onClick={() => handleDeleteMessage(guestID)}>Delete</button>}</p>}
-    <div className='images'>
+    <div>
       {fileData.map((data) => 
         <div id={`imageContainer_${data.ID}`} key ={data.ID}>
           <img src={`\\images\\${data.fileName}`}></img><br></br>
@@ -256,8 +266,8 @@ function Event(){
       <div>
         {guestData.length > 0 &&
         <div>
-        <button onClick = {handleDownload}>Download Images</button>
-        <button onClick = {()=>setManageContentToggled(!manageContentToggled)}>Manage Content</button>
+        <button className="styled-btn" onClick = {handleDownload}>Download Images</button>
+        <button className="styled-btn" onClick = {()=>setManageContentToggled(!manageContentToggled)}>Manage Content</button>
         </div>
         }
         <div>
@@ -272,7 +282,7 @@ function Event(){
 function Organizer(){
   const [eventName, setEventName] = useState('');
   const [eventDataArr, setEventDataArr] = useState([]);
-  const[eventNameElements, setEventNameElements] = useState([]);
+  const [eventNameElements, setEventNameElements] = useState([]);
   const [code, setCode] = useState();
   const organizerID = useParams();
   const navigate = useNavigate();
@@ -288,7 +298,7 @@ function Organizer(){
           console.log(error);
         }
     };
-    return <div key={eventData.id}> <h3><a href={`../event/${eventData.id}/${organizerID.organizerID}`}>{eventData.eventName}</a></h3><p>Access Code: {eventData.accessCode}</p><p>Guest Link: <a href={`http://localhost:3000/guest/${eventData.id}`}>http://localhost:3000/guest/{eventData.id}</a></p><button onClick={handleDelete}>Delete</button></div>
+    return <div className ="containerEvent" key={eventData.id}> <h3><a href={`../event/${eventData.id}/${organizerID.organizerID}`}>{eventData.eventName}</a></h3><p>Access Code: {eventData.accessCode}</p><p>Guest Link: <a href={`http://localhost:3000/guest/${eventData.id}`}>http://localhost:3000/guest/{eventData.id}</a></p><button className="delete-btn" onClick={handleDelete}>Delete</button></div>
   };
   //getting the event data and setting the states for the first time
   useEffect(() => {
@@ -340,25 +350,27 @@ function Organizer(){
   
   return (
     <>
-    <h1>My Events</h1>
-        <h2>Previous Events</h2>
-        <div>
-          {eventNameElements}
-        </div>
-        <h1>Create Your Event</h1>
+      <h1>My Events</h1>
+      <h10>Previous Events</h10>
+      <div>
+        {eventNameElements}
+      </div>
+      <div className="container">
+        <h2>Create Your Event</h2>
         <form onSubmit = {handleSubmit}>
-        <label htmlFor="Name">
-          Event Name:
-        </label>
-        <input id="Name" type="text" onChange={handleNameChange}></input>
-        <br></br>
-        <label htmlFor="AccessCode">
-          Access Code:
-        </label>
-        <input id="AccessCode" type="text" onChange={handleCodeChange}></input>
-        <br></br>
-        <button disabled={!eventName}>Submit</button>
+          <label htmlFor="Name">
+            Event Name:
+          </label>
+          <input id="Name" type="text" placeholder="Enter your event name" onChange={handleNameChange}></input>
+      
+          <label htmlFor="AccessCode">
+            Access Code:
+          </label>
+          <input id="AccessCode" type="text" placeholder="Create a unique access code" onChange={handleCodeChange}></input>
+
+          <button className="styled-btn" disabled={!eventName}>Submit</button>
         </form>
+      </div>
     </>
   );
 };
@@ -425,24 +437,32 @@ function Guest (){
     <>
     {
       !codeAccessValid && 
-      <form onSubmit={handleAccessCodeSubmit}>
-      <label>
-        Access Code:
-        <input type="text" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} />
-      </label>
-      <button type="submit">Submit</button>
-    </form>
+      <div className="container">
+        <form onSubmit={handleAccessCodeSubmit}>
+          <label>
+            Access Code:
+            <input type="text" value={accessCode} placeholder="Enter access code" onChange={(event) => setAccessCode(event.target.value)} />
+          </label>
+          <button className="styled-btn" type="submit">Submit</button>
+        </form>
+      </div>
     }
-    {codeAccessValid && <div><h1>Welcome to {eventName} </h1>
-    <form onSubmit = {handleSubmit} id="guestForm" encType="multipart/form-data">
-      <label htmlFor="name">First name:</label><br />
-      <input type="text" id="name" name="name" onChange={(event) => setName(event.target.value)}/><br />
-      <label htmlFor="message">Type message here:</label><br />
-      <textarea id="message" name="message" rows="4" cols="50" onChange={(event) => setMessage(event.target.value)}></textarea><br />
-      <label htmlFor="media">Upload media here:</label><br />
-      <input multiple type="file" onChange = {(event) => setFile(event.target.files)}/><br />
-      <button type="submit" form="guestForm" disabled={isSubmitting}>Submit</button>
-    </form></div>}
+    {codeAccessValid && 
+    <div>
+      <h2>Welcome to</h2>
+      <h5>{eventName}</h5>
+      <div className="container">
+        <form onSubmit = {handleSubmit} id="guestForm" encType="multipart/form-data">
+          <label htmlFor="name">First name:</label>
+          <input type="text" id="name" name="name" placeholder='Please enter your name' onChange={(event) => setName(event.target.value)}/><br />
+          <label htmlFor="message">Type message here:</label>
+          <textarea placeholder='Please enter your message' id="message" name="message" rows="4" cols="50" onChange={(event) => setMessage(event.target.value)}></textarea><br />
+          <label htmlFor="media">Upload media here:</label>
+          <input multiple type="file" onChange = {(event) => setFile(event.target.files)}/><br />
+          <button className="styled-btn" type="submit" form="guestForm" disabled={isSubmitting}>Submit</button>
+        </form>
+      </div>
+    </div>}
   </>
   );
 }

@@ -48,7 +48,7 @@ body {
   text-align: center;
 }
 
-    .container {
+.containerWelcome {
   max-width: 500px;
   margin: 0 auto;
   padding: 0 1em;
@@ -62,13 +62,50 @@ h1 {
   font-weight: 600;
 }
 
+h2 {
+  font-size: 25px;
+  margin-top: 50px;
+  color: #444444;
+  font-weight: 600;
+}
+
+h3 {
+  margin-bottom: 2px;
+  color: #444444;
+}
+
+h5 {
+  font-size: 36px;
+  margin-top: 1px;
+  margin-bottom: 10px;
+  color: #CBA135;
+  font-weight: 600;
+}
+
+h10 {
+  font-size: 25px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  color: #444444;
+  font-weight: 600;
+}
+
 p {
   margin-top: 20px;
   margin-bottom: 20px;
 }
 
+a {
+  text-decoration: none;
+  color: #CBA135;
+}
+
+a:visited {
+  color: #CBA135; /* set the link color for visited links */
+}
+
 button {
-  background-color: #000000;
+  background-color: #CBA135;
   color: #ffffff;
   font-size: 16px;
   border: none;
@@ -108,7 +145,7 @@ button:hover:before {
 }
 
 /* Style the 'Sign In' button */
-.signin-btn {
+.styled-btn {
   font-size: 14px;
   padding: 10px 20px;
   margin-right: 10px;
@@ -123,12 +160,12 @@ button:hover:before {
   border-radius: 50px;
 }
 
-.signin-btn:hover {
+.styled-btn:hover {
   transform: translateY(-6px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-.signin-btn:active {
+.styled-btn:active {
   transform: translateY(0px);
   background-color: #fff;
   color: #000;
@@ -163,37 +200,138 @@ button:hover:before {
   box-shadow: none;
 }
 
-.guestData {
-background-color: #FFFFFF;
-color: #000000;
+ /* Style the 'Delete' button */
+ .delete-btn {
+  padding: 3px 20px;
+  color: #fff;
+  background-color: #CBA135;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
 }
 
-.guestData h3 {
-color: #CBA135;
+* {
+  box-sizing: border-box;
 }
 
-.guestData button {
-background-color: #CBA135;
-color: #FFFFFF;
-border: none;
-padding: 5px;
-margin-top: 10px;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  background-color: #F5F5F5;
 }
 
-.guestData button:hover {
-background-color: #FFFFFF;
-color: #CBA135;
-cursor: pointer;
-}
-
-.guestData img {
-  width: 100%;
-  height: 200px;
-}
-
-.images{
+.navbar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center; /* center items horizontally */
-  align-items: end; /* center items vertically */
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FFFFFF;
+  height: 64px;
+  padding: 0 24px;
+  color: #000000;
+  font-size: 24px;
+  font-weight: bold;
+  border-bottom: 1px solid #D8D8D8;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.navbar__logo {
+  font-size: 32px;
+  font-weight: bold;
+  color: #CBA135;
+  cursor: pointer;
+}
+
+.navbar__menu {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+
+.container {
+  max-width: 350px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  margin: 0 auto;
+  margin-top: 96px;
+  margin-bottom: 96px;
+}
+
+.container img {
+  max-width: 95%;
+  height: auto;
+  border-radius: 2%;
+}
+
+form {
+  padding: 24px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #555555;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 24px;
+  border: none;
+  background-color: #F5F5F5;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #333333;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #CBA135;
+}
+
+input[type="text"], input[type="password"] {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 24px;
+  border: none;
+  background-color: #F5F5F5;
+  border-radius: 4px;
+  font-size: 16px;
+  color: #333333;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #CBA135;
+}
+
+
+
+.containerEvent {
+  max-width: 250px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+
+.smallText {
+  margin-bottom: 5px;
 }
