@@ -67,7 +67,7 @@ app.get("/eventImages/:eventId", async(req, res) => {
 
 //sends the eventNames and ids for a specified organizer
 app.get("/eventData/:organizerID", async(req, res) => {
-	const eventNames = await db.all("SELECT id, eventName FROM event WHERE organizerID = ?", req.params.organizerID);
+	const eventNames = await db.all("SELECT id, eventName, accessCode FROM event WHERE organizerID = ?", req.params.organizerID);
 	res.json(eventNames);
 });
 //sends the guestData(id, name, message and files)
