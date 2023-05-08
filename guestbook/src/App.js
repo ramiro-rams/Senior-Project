@@ -153,30 +153,64 @@ function SignUp(){
   );
 }
 
-function GuestData({name, message, fileData}){
+function GuestData({guestID, name, message, fileData, manageContentToggled}){
 
-  const handleDownload = async () => {
-    fileData.forEach((data, index) => {
-      const link = document.createElement('a');
-      link.download = `guest_${name}_${index}`;
-      link.href = `\\images\\${data.fileName}`;
-      link.click();
-    });
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this image?')) {
+      // Implement code to delete image here
+      await axios.post(`http://localhost:8080/deleteImage` ,{
+        imageID: id
+      })
+      //removing the corresponding image container from the DOM
+      const container = document.getElementById(`imageContainer_${id}`);
+      if (container) {
+        container.remove();
+      }
+    }
+  }
+  const handleDeleteName = async (id) => {
+    if(window.confirm('Are you sure you want to delete this name?')) {
+      await axios.post(`http://localhost:8080/deleteName`, {
+        guestID: id
+      })
+      const container = document.getElementById(`name_${id}`);
+      if (container) {
+        container.remove();
+      }
+    }
+  }
+  const handleDeleteMessage = async (id) => {
+    if(window.confirm('Are you sure you want to delete this message?')) {
+      await axios.post(`http://localhost:8080/deleteMessage`, {
+        guestID: id
+      })
+      const container = document.getElementById(`message_${id}`);
+      if (container) {
+        container.remove();
+      }
+    }
   }
   return(
-    <>
-    <h3>{name}</h3>
-    <p>{message}</p>
-    <button onClick={handleDownload}>Download Images</button><br></br>
-    {fileData.map((data) => <img key ={data.ID} height="100" src={`\\images\\${data.fileName}`}></img>)}
-    </>
+    <div className='guestData'>
+    {name != null && <h3 id={`name_${guestID}`}>{name} {manageContentToggled && <button onClick={() => handleDeleteName(guestID)}>Delete</button>}</h3>}
+    {message != null && <p id={`message_${guestID}`}>{message}{manageContentToggled && <button onClick={() => handleDeleteMessage(guestID)}>Delete</button>}</p>}
+    <div className='images'>
+      {fileData.map((data) => 
+        <div id={`imageContainer_${data.ID}`} key ={data.ID}>
+          <img src={`\\images\\${data.fileName}`}></img><br></br>
+          {manageContentToggled && <button onClick={() => handleDelete(data.ID)}>Delete</button>}
+        </div>)}
+    </div>
+    </div>
   );
 }
 
 function Event(){
   const[guestData, setGuestData] = useState([]);
+  const[manageContentToggled, setManageContentToggled] = useState(false);
   const params = useParams();
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -193,16 +227,44 @@ function Event(){
     }
     fetch();
   }, []);
-  const guestNameElements = guestData.map((object) => <GuestData key={object.id} name={object.name} message={object.message} fileData={object.fileData}/>);
+
+  useEffect(()=>{
+    console.log(manageContentToggled);
+  },[manageContentToggled])
+
+  const handleDownload = async () => {
+      try{
+        const response = await axios.get(`http://localhost:8080/guestData/${params.eventID}`);
+        response.data.forEach((object)=>{
+          object.fileData.forEach((data, index)=>{
+            const link = document.createElement('a');
+            link.download = `guest_${object.name}_${index}`;
+            link.href = `\\images\\${data.fileName}`;
+            link.click();
+          });
+        })
+      } catch(error){
+        console.log(error);
+      }
+  }
+  const guestNameElements = guestData.map((object) => <GuestData key={object.id} guestID={object.id} name={object.name} message={object.message} fileData={object.fileData} manageContentToggled={manageContentToggled}/>);
   return(
     <>
     <div>
-    <h1>Guests</h1>
-    <div>
+      <h1>Guests</h1>
+      {!(guestData.length > 0) && <h2>Once the guests upload their submissions, you will see the content here.</h2>}
       <div>
-        {guestNameElements}
+        {guestData.length > 0 &&
+        <div>
+        <button onClick = {handleDownload}>Download Images</button>
+        <button onClick = {()=>setManageContentToggled(!manageContentToggled)}>Manage Content</button>
+        </div>
+        }
+        <div>
+          {guestNameElements}
+        </div>
       </div>
-    </div></div>
+    </div>
     </>
     
   );
@@ -345,8 +407,10 @@ function Guest (){
       const formData = new FormData();
       formData.append('name', name);
       formData.append('message', message);
-      for(let i = 0; i < file.length; ++i){
-        formData.append('file', file[i]);
+      if (file !== null) {
+        for(let i = 0; i < file.length; ++i){
+          formData.append('file', file[i]);
+        }
       }
       //submitting data guest inputed
       const response = await axios.post(`http://localhost:8080/guest/${eventID.eventID}`, formData);

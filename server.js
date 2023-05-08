@@ -101,6 +101,14 @@ app.get('/login/:username', async (req, res) => {
 	const row = await db.get('SELECT password, id FROM organizer WHERE username = ?', username);
 	res.send(row);
 });
+app.get('/guestName/:guestID', async (req, res) => {
+	const response = await db.get('SELECT name FROM guest WHERE id = ?', req.params.guestID)
+	res.send(response);
+})
+app.get('/guestMessage/:guestID', async (req, res) => {
+	const response = await db.get('SELECT message FROM guest WHERE id = ?', req.params.guestID)
+	res.send(response);
+})
 
 //uploads data from guest into database
 app.post("/guest/:eventId", upload.array('file'), async(req, res) => {
@@ -142,5 +150,23 @@ app.post('/sessionID', async (req, res) => {
 	const organizerID = req.body.organizerID;
 	const response = await db.run("UPDATE organizer SET sessionID = ? WHERE id = ?", [sessionID, organizerID]);
 	res.send("success");
+})
+app.post('/deleteImage', async (req, res) => {
+	const imageID = req.body.imageID;
+	const response = await db.run('DELETE FROM media WHERE id = ?', imageID);
+	res.send("success");
+})
+
+app.post(`/deleteName`, async (req, res) => {
+	console.log("deleting name")
+	const guestID = req.body.guestID;
+	const response = await db.run("UPDATE guest SET name = ? WHERE id = ?", [null, guestID]);
+	console.log("name deleted");
+	res.send('success');
+})
+app.post(`/deleteMessage`, async (req, res) => {
+	const guestID = req.body.guestID;
+	const response = await db.run("UPDATE guest SET message = ? WHERE id = ?", [null, guestID]);
+	res.send('success');
 })
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
